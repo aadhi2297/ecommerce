@@ -1,7 +1,15 @@
 <?php
 session_start();
-include 'includes/db.php'; // Include the database connection
 
+
+// ADD THIS LOGOUT LOGIC
+if (isset($_POST['logout'])) {
+    session_unset();
+    session_destroy();
+    header('Location: pages/login.php'); // Redirects to the homepage after logout
+    exit();
+}
+include 'includes/db.php';
 // Fetch products from the database
 $stmt = $conn->query("SELECT * FROM products");
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -1,11 +1,27 @@
 <?php
 include '../includes/db.php';
 session_start();
+
+// Security check: ensure only admins can access this page
 if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
     exit();
 }
 
+// --- LOGIC TO HANDLE PRODUCT DELETION ---
+if (isset($_GET['delete_id'])) {
+    $product_id = $_GET['delete_id'];
+
+    // Use a prepared statement to securely delete the product
+    $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
+    $stmt->execute([$product_id]);
+    
+    // Redirect back to the same page to refresh the product list
+    header('Location: manage_products.php');
+    exit();
+}
+
+// --- LOGIC TO FETCH AND DISPLAY PRODUCTS ---
 $stmt = $conn->query("SELECT * FROM products");
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -72,6 +88,14 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background-color: #007bff;
             color: white;
         }
+        .actions a.delete {
+            color: #f44336;
+            border-color: #f44336;
+        }
+        .actions a.delete:hover {
+            background-color: #f44336;
+            color: white;
+        }
         .btn-back {
             display: block;
             width: 150px;
@@ -95,29 +119,31 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h2>Manage Products</h2>
 
     <table>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Description</th>
-            <th>Image</th>
-            <th>Actions</th>
-        </tr>
-
-        <?php foreach ($products as $product) : ?>
+        <thead>
             <tr>
-                <td><?= $product['id']; ?></td>
-                <td><?= htmlspecialchars($product['name']); ?></td>
-                <td>$<?= number_format($product['price'], 2); ?></td>
-                <td><?= htmlspecialchars($product['description']); ?></td>
-                <td><img src="../images/<?= htmlspecialchars($product['image']); ?>" alt="Product Image"></td>
-                <td class="actions">
-                    <a href="edit_product.php?id=<?= $product['id']; ?>">Edit</a>
-                    <a href="delete_product.php?id=<?= $product['id']; ?>" onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
-                </td>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Actions</th>
             </tr>
-        <?php endforeach; ?>
-
+        </thead>
+        <tbody>
+            <?php foreach ($products as $product) : ?>
+                <tr>
+                    <td><?= htmlspecialchars($product['id']); ?></td>
+                    <td><?= htmlspecialchars($product['name']); ?></td>
+                    <td>$<?= number_format($product['price'], 2); ?></td>
+                    <td><?= htmlspecialchars($product['description']); ?></td>
+                    <td><img src="../images/<?= htmlspecialchars($product['image']); ?>" alt="Product Image"></td>
+                    <td class="actions">
+                        <a href="edit_product.php?id=<?= $product['id']; ?>">Edit</a>
+                        <a href="manage_products.php?delete_id=<?= $product['id']; ?>" class="delete" onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
     </table>
 
     <a href="dashboard.php" class="btn-back">Back to Dashboard</a>

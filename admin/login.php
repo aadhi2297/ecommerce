@@ -1,24 +1,47 @@
 <?php
-include '../includes/db.php';
+// Ensure the path to your database connection file is correct.
+// It should be one directory up from the 'admin' folder.
+include'db.php';
+
 session_start();
+$message = [];
 
 if (isset($_POST['login'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND role = 'admin'");
-    $stmt->execute([$email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Use a prepared statement with mysqli for security
+   // Use a prepared statement with PDO for security
+// Use a prepared statement with PDO for security
+$stmt = $conn->prepare("SELECT * FROM `users` WHERE email = ?");
+$stmt->execute([$email]);
 
-    if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['admin_id'] = $user['id'];
-        header("Location: dashboard.php");
-        exit();
+// Fetch the result directly. fetch() returns false if no rows are found.
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($user) {
+    // Now you can proceed with password and role verification
+    if(password_verify($password, $user['password'])){
+        if($user['role'] == 'admin'){
+            $_SESSION['admin_name'] = $user['name'];
+            $_SESSION['admin_email'] = $user['email'];
+            $_SESSION['admin_id'] = $user['id'];
+            header('location:dashboard.php');
+        } elseif($user['role'] == 'user'){
+            $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['user_id'] = $user['id'];
+            header('location:home.php');
+        }
     } else {
-        echo "<p style='color:red; text-align:center;'>Invalid credentials or not an admin.</p>";
+        $message[] = 'Incorrect email or password!';
     }
+} else {
+    $message[] = 'Incorrect email or password!';
+}
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -79,16 +102,18 @@ if (isset($_POST['login'])) {
             color: red;
             font-size: 14px;
         }
-        .form-footer {
-            text-align: center;
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
-
     <div class="login-container">
         <h2>Admin Login</h2>
+        <?php
+            if (!empty($message)) {
+                foreach ($message as $msg) {
+                    echo '<p class="error-message">' . htmlspecialchars($msg) . '</p>';
+                }
+            }
+        ?>
         <form method="POST">
             <label for="email">Email</label>
             <input type="email" name="email" id="email" required>
@@ -99,6 +124,5 @@ if (isset($_POST['login'])) {
             <button type="submit" name="login">Login</button>
         </form>
     </div>
-
 </body>
 </html>
