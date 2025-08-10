@@ -34,21 +34,21 @@ It includes a **customer-facing store** for browsing and purchasing products, as
 ```
 
 /ecommerce/
-├── admin/                 # Admin panel files
+├── admin/                
 │   ├── dashboard.php
 │   ├── login.php
 │   ├── manage\_products.php
-├── pages/                 # Customer-facing pages
+├── pages/                
 │   ├── login.php
 │   ├── cart.php
 │   ├── checkout.php
-├── includes/              # Reusable PHP files (e.g., db.php)
+├── includes/              
 │   └── db.php
-├── css/                   # CSS stylesheets
+├── css/                   
 │   └── style.css
-├── uploaded\_img/          # Directory for product images
-├── index.php              # Homepage
-└── README.md              # This file
+├── uploaded\_img/          
+├── index.php             
+└── README.md              
 
 ````
 
