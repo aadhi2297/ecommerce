@@ -170,6 +170,5 @@ GitHub: [aadhi2297](https://github.com/aadhi2297)
 
 ---
 
-If you want, I can also add **screenshots** of the UI to make the README more attractive for recruiters and users.  
-Do you want me to prepare it with **screenshots + badges** so it looks professional?
+
 ```
